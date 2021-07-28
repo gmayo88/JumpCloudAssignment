@@ -10,6 +10,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ActionTimeRecorder.Tests", "ActionTimeRecorder.Tests", "{E9C5E92B-2EF4-4820-8D03-2FBF0E806E39}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActionTimeRecorder.Tests", "ActionTimeRecorder.Tests\ActionTimeRecorder.Tests.csproj", "{EA1F1AFE-8C9E-43FE-B7AF-552EB6774EBA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7B8AFB82-A4DC-4DD1-BB5E-66B0A127F2E4} = {7B8AFB82-A4DC-4DD1-BB5E-66B0A127F2E4}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
