@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ActionTimeRecorder.Service
+namespace ActionTimeRecorder.Services
 {
-    class ActionService
+    public class ActionService
     {
     }
 }
