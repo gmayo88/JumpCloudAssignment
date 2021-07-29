@@ -2,7 +2,7 @@
 
 namespace ActionTimeRecorder.Models
 {
-    class ActionInfo
+    public class ActionInfo
     {
         [JsonProperty("action", Required = Required.Always)]
         public string Action { get; set; }
