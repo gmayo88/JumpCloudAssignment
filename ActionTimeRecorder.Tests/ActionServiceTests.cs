@@ -102,7 +102,7 @@ namespace ActionTimeRecorder.Tests
         public void GetStats_ShouldReturnCorrectAverageForSingleAction()
         {
             // Arrange
-            var expectedResult = "[{\"action\":\"run\",\"avg\":100}]";
+            var expectedResult = "[{\"action\":\"run\",\"avg\":100.0}]";
             var action = "{\"action\":\"run\",\"time\":100}";
 
             // Act
