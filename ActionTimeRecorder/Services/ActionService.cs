@@ -64,13 +64,13 @@ namespace ActionTimeRecorder.Services
             var actionStats = _actionDictionary
                 .OrderBy(x => x.Key)
                 .Select(x => 
-            {
-                return new ActionStats 
                 {
-                    Action = x.Key,
-                    Avg = x.Value.Average()
-                };
-            });
+                    return new ActionStats 
+                    {
+                        Action = x.Key,
+                        Avg = x.Value.Average()
+                    };
+                });
 
             // Return the serialized object
             return JsonConvert.SerializeObject(actionStats);
