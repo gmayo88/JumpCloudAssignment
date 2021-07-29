@@ -5,7 +5,7 @@ Take-home interview assignment for JumpCloud. Provides two methods to add action
 ## Requirements
 
 - Windows 10
-- [Visual Studio 2019 Communit Edition](https://visualstudio.microsoft.com/downloads/) or greater
+- [Visual Studio 2019 Community Edition](https://visualstudio.microsoft.com/downloads/) or greater
 - Command Prompt or PowerShell
 - Git
 - [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1)
@@ -94,6 +94,15 @@ void main()
 }
 
 ```
+
+## Design
+
+### Thread-safe Collections
+This service stores actions in a ConconurrentDictionary using the ActionInfo's Action string as a key and an IEnumerable of ints as a value. When AddAction is called, the JSON input string is validated and, if successful, the Action and its time are added to the dictionary. If the key already exists, the method updates the value by calling the IEnumerable Append extension method, which creates a copy of the existing IEnumerable value with the newly added value at the end of the list. GetStats retrieves each IEnumerable in the ConcurrentDictionary and calculates the average value of each collection using Average().
+
+ConcurrentDictionary was chosen for fast lookups and a smaller memory footprint.
+
+An alternate implementation could use a ConcurrentBag. Each ActionInfo could be easily stored in the bag and retrieved by grouping the elements by the Action value. This would require that each time value be stored with its associated action string, causing a greater memory footprint. Alternatively, a separate bag holding only ints could be created for each action type, but this would make the code increasingly more messy with each new action type.
 
 ## Assumptions
 
