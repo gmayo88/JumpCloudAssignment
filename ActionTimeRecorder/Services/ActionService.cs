@@ -19,7 +19,8 @@ namespace ActionTimeRecorder.Services
 
         public ActionService()
         {
-            _actionDictionary = new ConcurrentDictionary<string, IEnumerable<int>>();
+            _actionDictionary = new ConcurrentDictionary<string, IEnumerable<int>>(
+                StringComparer.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
