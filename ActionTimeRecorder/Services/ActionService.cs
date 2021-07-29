@@ -51,9 +51,29 @@ namespace ActionTimeRecorder.Services
             return ActionMessages.Success;
         }
 
+        /// <summary>
+        /// Calculates the average time for each action type
+        /// stored in _actionDictionary
+        /// </summary>
+        /// <returns>A Json string representing the array of averages</returns>
         public string GetStats()
         {
-            throw new NotImplementedException();
+            // Convert each key/value pair in the
+            // dictionary to an ActionStats object
+            // containing the average time for the action
+            var actionStats = _actionDictionary
+                .OrderBy(x => x.Key)
+                .Select(x => 
+            {
+                return new ActionStats 
+                {
+                    Action = x.Key,
+                    Avg = x.Value.Average()
+                };
+            });
+
+            // Return the serialized object
+            return JsonConvert.SerializeObject(actionStats);
         }
 
         /// <summary>
