@@ -1,5 +1,9 @@
 ﻿using ActionTimeRecorder.Models;
 using ActionTimeRecorder.Services;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace ActionTimeRecorder.Tests
@@ -68,7 +72,7 @@ namespace ActionTimeRecorder.Tests
             Assert.Equal(expectedResult, result);
         }
 
-        [Fact(DisplayName = "Add Action Should Return Error for Empty Input")]
+        [Fact(DisplayName = "AddAction Should Return Error for Empty Input")]
         public void AddAction_ShouldReturnErrorForEmptyInput()
         {
             // Arrange
@@ -81,11 +85,36 @@ namespace ActionTimeRecorder.Tests
             Assert.Equal(expectedResult, result);
         }
 
+        [Fact(DisplayName = "AddAction Should Handle Async Requests")]
+        public void AddAction_ShouldHandleAsyncRequests()
+        {
+            // Arrange
+            var expectedResult = ActionMessages.Success;
+            var results = new List<string>();
+
+            // Act
+            Parallel.For(0, 100, index => 
+            {
+                var actionInfo = new ActionInfo 
+                {
+                    Action = (index % 2 == 0) ? "jump" : "run",
+                    Time = index
+                };
+
+                var inputJson = JsonConvert.SerializeObject(actionInfo);
+                var result = _sut.AddAction(inputJson);
+                results.Add(result);
+            });
+
+            // Assert
+            Assert.All(results, result => Assert.Equal(expectedResult, result));
+        }
+
         #endregion
 
         #region GetStats Tests
 
-        [Fact(DisplayName = "Get Stats Should Return Empty Array for No Actions")]
+        [Fact(DisplayName = "GetStats Should Return Empty Array for No Actions")]
         public void GetStats_ShouldReturnEmptyArrayForNoActions()
         {
             // Arrange
@@ -98,7 +127,7 @@ namespace ActionTimeRecorder.Tests
             Assert.Equal(expectedResult, result);
         }
 
-        [Fact(DisplayName = "Get Stats Should Return Correct Average for Single Action")]
+        [Fact(DisplayName = "GetStats Should Return Correct Average for Single Action")]
         public void GetStats_ShouldReturnCorrectAverageForSingleAction()
         {
             // Arrange
@@ -114,7 +143,7 @@ namespace ActionTimeRecorder.Tests
             Assert.Equal(expectedResult, getResult);
         }
 
-        [Fact(DisplayName = "Get Stats Should Return Correct Average for Multiple Actions")]
+        [Fact(DisplayName = "GetStats Should Return Correct Average for Multiple Actions")]
         public void GetStats_ShouldReturnCorrectAverageForMultipleActions()
         {
             // Arrange
@@ -135,6 +164,80 @@ namespace ActionTimeRecorder.Tests
             Assert.Equal(string.Empty, addResult4);     // Each Add Action was successful
 
             Assert.Equal(expectedResult, getResult);
+        }
+
+        [Fact(DisplayName = "AddAction and GetStats Should Handle Async Requests")]
+        public async Task AddActionAndGetStats_ShouldHandleAsyncRequests()
+        {
+            // Arrange
+            var timeToDelay = TimeSpan.FromMilliseconds(100);
+
+            // Act
+            var addTask = Task.Run(() =>
+            {
+                var addResults = string.Empty;
+                for (int i = 0; i < 20; i++)
+                {
+                    var action = new ActionInfo()
+                    {
+                        Action = (i % 2 == 0) ? "jump" : "run",
+                        Time = 10
+                    };
+                    var actionJson = JsonConvert.SerializeObject(action);
+                    addResults += _sut.AddAction(actionJson);
+                }
+                return addResults;
+            });
+
+            var getTask = Task.Run(async () =>
+            {
+                var getResults = string.Empty;
+                for (int i = 0; i < 10; i++)
+                {
+                    getResults += _sut.GetStats();
+                    await Task.Delay(timeToDelay);
+                }
+                return getResults;
+            });
+
+            var results = await Task.WhenAll(addTask, getTask);
+
+            // Assert
+            Assert.True(string.IsNullOrEmpty(results[0]));
+            Assert.False(string.IsNullOrEmpty(results[1]));
+        }
+
+        [Theory(DisplayName = "AddAction and GetStats Async Should Return Correct Results")]
+        [InlineData(10, "[{\"action\":\"run\",\"avg\":4.5}]")]
+        [InlineData(100, "[{\"action\":\"run\",\"avg\":49.5}]")]
+        [InlineData(500, "[{\"action\":\"run\",\"avg\":249.5}]")]
+        [InlineData(1000, "[{\"action\":\"run\",\"avg\":499.5}]")]
+        [InlineData(10000, "[{\"action\":\"run\",\"avg\":4999.5}]")]
+        public void AddActionAndGetStats_AsyncShouldReturnCorrectResults(int iterations, string expectedResult)
+        {
+            // Arrange
+            var addActionResponses = new List<string>();
+
+            // Act
+            Parallel.For(0, iterations, index =>
+            {
+                var actionInfo = new ActionInfo
+                {
+                    Action = "run",
+                    Time = index
+                };
+
+                var actionJson = JsonConvert.SerializeObject(actionInfo);
+                var response = _sut.AddAction(actionJson);
+            });
+
+            var getStatsResult = _sut.GetStats();
+
+            // Assert
+
+            // AddAction should return successfully each time it is called
+            Assert.All(addActionResponses, result => Assert.True(string.IsNullOrEmpty(result)));
+            Assert.Equal(expectedResult, getStatsResult);
         }
 
         #endregion
